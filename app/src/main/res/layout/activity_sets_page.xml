@@ -9,6 +9,7 @@
     android:orientation="vertical">
 
     <EditText
+        android:id="@+id/editTxtSetsPageLiftType"
         android:layout_width="200dp"
         android:layout_height="50dp"
         android:layout_margin="25dp"
@@ -73,6 +74,27 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@android:color/black"/>-->
+<!--<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp">
 
+    <Button
+        android:id="@+id/btnAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Set"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="30dp"
+        />
+
+    <Button
+        android:id="@+id/btn_del"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Delete Lift"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="30dp"/>
+</RelativeLayout>-->
 
 </LinearLayout>
