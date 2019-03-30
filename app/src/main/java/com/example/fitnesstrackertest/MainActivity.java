@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lsTest;
     private Button btnAddWorkout1;
     private ArrayList<Workout> test;
-    ArrayAdapter arrayAdapter;
+    private ArrayAdapter arrayAdapter;
     public static final int CREATE_WORKOUT_ID = 1;
     public static final int GET_WORKOUT_ID = 2;
 
@@ -36,15 +36,15 @@ public class MainActivity extends AppCompatActivity {
         test = new ArrayList<Workout>();
         ArrayList<Lift> testLift=new ArrayList<Lift>();
         ArrayList<Set> setTest=new ArrayList<Set>();
-        setTest.add(new Set(165, 10));
-        setTest.add(new Set(175, 10));
-        setTest.add(new Set(185, 10));
-        testLift.add(new Lift("Bench", setTest));
-        testLift.add(new Lift("Squat", setTest));
-        testLift.add(new Lift("Deadlift", setTest));
-        test.add(new Workout(LocalDate.now(), "test2", testLift));
-        test.add(new Workout(LocalDate.now(), "test3", testLift));
-        test.add(new Workout(LocalDate.now(), "test4", testLift));
+        setTest.add(new Set(1,165, 10));
+        setTest.add(new Set(2,175, 10));
+        setTest.add(new Set(3,185, 10));
+        testLift.add(new Lift(1,"Bench", setTest));
+        testLift.add(new Lift(2, "Squat", setTest));
+        testLift.add(new Lift(3,"Deadlift", setTest));
+        test.add(new Workout(1,LocalDate.now(), "test2", testLift));
+        test.add(new Workout(2,LocalDate.now(), "test3", testLift));
+        test.add(new Workout(3,LocalDate.now(), "test4", testLift));
 
         arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, test);
         lsTest.setAdapter(arrayAdapter);
@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void addWorkout(View view) {
         Intent intent = new Intent(this, AddWorkout.class);
+        intent.putExtra("size",test.size());
         startActivityForResult(intent, CREATE_WORKOUT_ID);
     }
 

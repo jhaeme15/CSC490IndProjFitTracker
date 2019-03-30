@@ -6,14 +6,23 @@ import java.util.ArrayList;
 public class Lift implements Serializable {
     private String lift;
     private ArrayList<Set> sets;
-
+    private int id;
 
     public Lift(String lift){
         this.lift=lift;
         this.sets=new ArrayList<Set>();
     }
 
-    public Lift(String lift, ArrayList<Set> sets){
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Lift(int id, String lift, ArrayList<Set> sets){
+        this.id=id;
         this.lift=lift;
         this.sets=new ArrayList<Set>(sets);
     }
@@ -36,9 +45,11 @@ public class Lift implements Serializable {
     @Override
     public String toString(){
         String display=lift+"\n";
-        display+=sets.get(0).toString();
-        for (int i=1; i<sets.size(); i++){
-            display+=", "+sets.get(i).toString();
+        if(sets.size()>0) {
+            display += sets.get(0).toString();
+            for (int i = 1; i < sets.size(); i++) {
+                display += ", " + sets.get(i).toString();
+            }
         }
         return display;
     }

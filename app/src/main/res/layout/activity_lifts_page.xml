@@ -7,18 +7,65 @@
     android:orientation="vertical"
     tools:context=".LiftsPage">
 
-
-    <TextView
-        android:id="@+id/txtHeading"
-        android:layout_width="match_parent"
+    <EditText
+        android:id="@+id/txtDateLiftsPage"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:hint="Date (mm/dd/yyyy)"
+        android:ems="10"
+        android:inputType="date"
+         />
+    <EditText
+        android:id="@+id/txtDescriptionLiftsPage"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:hint="Description"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btnSaveWorkout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Save"
+            android:layout_toLeftOf="@id/btnAddLift"/>
 
     <Button
         android:id="@+id/btnAddLift"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:onClick="addLift"
+        android:layout_centerHorizontal="true"
         android:text="Add Lift" />
+
+        <Button
+            android:id="@+id/btnDelWorkout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Delete"
+            android:layout_toRightOf="@id/btnAddLift" />
+
+    </RelativeLayout>
 
     <ListView
         android:id="@+id/liftsListView"

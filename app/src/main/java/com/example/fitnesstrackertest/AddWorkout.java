@@ -15,6 +15,7 @@ import java.util.Date;
 public class AddWorkout extends AppCompatActivity {
     private EditText txtDescription;
     private EditText txtDate;
+    private int id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +25,7 @@ public class AddWorkout extends AppCompatActivity {
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         Date date = new Date();
         txtDate.setText(dateFormat.format(date));
+        id=(int) getIntent().getSerializableExtra("size");
 
     }
 
@@ -35,7 +37,7 @@ public class AddWorkout extends AppCompatActivity {
             //int day=Integer.parseInt(dateStr.substring(4,6));
             //int year=Integer.parseInt(dateStr.substring(7));
             LocalDate date= LocalDate.now();
-            Workout workout=new Workout(date, descriptionStr);
+            Workout workout=new Workout(id+1, date, descriptionStr);
             Intent intent=new Intent(this, MainActivity.class);
             intent.putExtra("workout", workout);
             setResult(Activity.RESULT_OK, intent);
