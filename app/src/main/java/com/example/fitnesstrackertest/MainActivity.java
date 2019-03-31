@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Workout> test;
     private ArrayAdapter arrayAdapter;
     public static final int CREATE_WORKOUT_ID = 1;
-    public static final int GET_WORKOUT_ID = 2;
+    public static final int EDIT_WORKOUT_ID = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,17 +55,17 @@ public class MainActivity extends AppCompatActivity {
                 Workout choosenWorkout = test.get(position);
                 Intent intent = new Intent(MainActivity.this, LiftsPage.class);
                 intent.putExtra("choosenWorkout",choosenWorkout);
-                startActivity(intent);
-
+                startActivityForResult(intent, EDIT_WORKOUT_ID);
             }
         });
 
     }
 
     public void addWorkout(View view) {
-        Intent intent = new Intent(this, AddWorkout.class);
-        intent.putExtra("size",test.size());
+        Intent intent = new Intent(this, LiftsPage.class);
+        intent.putExtra("choosenWorkout",new Workout(test.size()+1, LocalDate.now(), "", new ArrayList<Lift>()));
         startActivityForResult(intent, CREATE_WORKOUT_ID);
+
     }
 
     //https://stackoverflow.com/questions/920306/sending-data-back-to-the-main-activity-in-android
@@ -76,10 +76,32 @@ public class MainActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Workout newWorkout = (Workout) data.getSerializableExtra("workout");
-                test.add(newWorkout);
-                arrayAdapter.notifyDataSetChanged();
+                if(newWorkout!=null) {
+                    test.add(newWorkout);
+                }
+
+            }
+        } else if(requestCode==EDIT_WORKOUT_ID){
+            if (resultCode == RESULT_OK) {
+                Workout workout = (Workout) data.getSerializableExtra("workout");
+                if(workout.getDate()==null) {
+                    for (int i=test.size()-1; i>=0; i--){
+                        if (workout.getId()==test.get(i).getId()){
+                            test.remove(i);
+                        }
+                    }
+                }else{
+                    for (int i=test.size()-1; i>=0; i--){
+                        if (workout.getId()==test.get(i).getId()){
+                            test.remove(i);
+                            test.add(i,workout);
+                        }
+                    }
+                }
+
             }
         }
+        arrayAdapter.notifyDataSetChanged();
     }
 }
 

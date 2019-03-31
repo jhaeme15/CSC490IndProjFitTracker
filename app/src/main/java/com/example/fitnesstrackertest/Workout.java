@@ -58,6 +58,10 @@ public class Workout implements Serializable {
         this.description = description;
     }
 
+    public String getDateStr(){
+        return date.getMonthValue()+"/"+date.getDayOfMonth()+"/"+date.getYear();
+    }
+
     @Override
     public String toString(){
         return date.getMonthValue()+"/"+date.getDayOfMonth()+"/"+date.getYear()+"\n"+description;
