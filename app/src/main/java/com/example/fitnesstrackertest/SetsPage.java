@@ -1,12 +1,16 @@
 package com.example.fitnesstrackertest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,6 +39,7 @@ public class SetsPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sets_page);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         lift = (Lift) getIntent().getSerializableExtra("choosenLift");
         txtLiftType =(EditText) findViewById(R.id.editTxtSetsPageLiftType) ;
         txtNotes=(EditText) findViewById(R.id.txtNotesSetsPage);
@@ -85,10 +90,7 @@ public class SetsPage extends AppCompatActivity {
         btnDelSet.setText("x");
         btnDelSet.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                delSet(v);
-            }
-        });
+            public void onClick(View v) { delSet(v); }});
         btnDelSet.setTextColor(Color.RED);
         btnDelSet.setHeight(80);
         btnDelSet.setWidth(80);
@@ -185,11 +187,31 @@ public class SetsPage extends AppCompatActivity {
 
         btnDeleteLift.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                lift.setLift(null);
-                Intent intent=new Intent(SetsPage.this, LiftsPage.class);
-                intent.putExtra("lift", lift);
-                setResult(Activity.RESULT_OK, intent);
-                finish();
+                //https://stackoverflow.com/questions/36747369/how-to-show-a-pop-up-in-android-studio-to-confirm-an-order
+                AlertDialog.Builder builder = new AlertDialog.Builder(SetsPage.this);
+                builder.setCancelable(true);
+                builder.setTitle("Confirm Delete");
+                builder.setMessage("Are you sure you want to delete this lift?");
+                builder.setPositiveButton("Confirm Delete",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                lift.setLift(null);
+                                Intent intent=new Intent(SetsPage.this, LiftsPage.class);
+                                intent.putExtra("lift", lift);
+                                setResult(Activity.RESULT_OK, intent);
+                                finish();
+                            }
+                        });
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
             }
         });
 
@@ -244,7 +266,19 @@ public class SetsPage extends AppCompatActivity {
     }
 
 
-
+    //https://stackoverflow.com/questions/14545139/android-back-button-in-the-title-bar
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
 
     // got from https://stackoverflow.com/questions/8391979/does-java-have-a-int-tryparse-that-doesnt-throw-an-exception-for-bad-data
     public boolean tryParseInt(String value) {
@@ -257,30 +291,31 @@ public class SetsPage extends AppCompatActivity {
     }
 
     public void delSet(View v){
-        int id=v.getId();
-        int count=0;
-        for(int i=setsViewList.size()-1; i>=0; i--){
-            Button btn=setsViewList.get(i).findViewById(id);
-            if(btn!=null){
 
-                weightsIds.remove(i);
-                repsids.remove(i);
-                linearLayout.removeView(setsViewList.get(i));
-                setsViewList.remove(i);
+            int id = v.getId();
+            int count = 0;
+            for (int i = setsViewList.size() - 1; i >= 0; i--) {
+                Button btn = setsViewList.get(i).findViewById(id);
+                if (btn != null) {
 
-                count=i;
-                for (int j=count; j<setsViewList.size(); j++){
-                    TextView lbl=(TextView) setsViewList.get(j).getChildAt(3);
-                    String setStr=lbl.getText().toString();
-                    int num=Integer.parseInt(setStr.substring(setStr.length()-1));
-                    lbl.setText("Set "+(num-1));
+                    weightsIds.remove(i);
+                    repsids.remove(i);
+                    linearLayout.removeView(setsViewList.get(i));
+                    setsViewList.remove(i);
 
+                    count = i;
+                    for (int j = count; j < setsViewList.size(); j++) {
+                        TextView lbl = (TextView) setsViewList.get(j).getChildAt(3);
+                        String setStr = lbl.getText().toString();
+                        int num = Integer.parseInt(setStr.substring(setStr.length() - 1));
+                        lbl.setText("Set " + (num - 1));
+
+                    }
+                    setNum--;
                 }
-                setNum--;
+
+
             }
-
-
-        }
     }
 
 

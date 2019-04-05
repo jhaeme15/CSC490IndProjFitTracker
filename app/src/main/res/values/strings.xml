@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">Fitness Tracker Test</string>
+    <string name="app_name">Fitness Tracker</string>
+    <string name="workout_page">Workout</string>
+    <string name="lift_page">Lift</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>

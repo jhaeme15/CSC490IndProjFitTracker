@@ -1,7 +1,10 @@
 package com.example.fitnesstrackertest;
 
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         lvWorkout = (ListView) findViewById(R.id.workoutListView);
         btnAddWorkout1 = (Button) findViewById(R.id.btnAddWorkout);
         workouts = new ArrayList<Workout>();

@@ -1,9 +1,16 @@
 package com.example.fitnesstrackertest;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,29 +38,55 @@ public class LiftsPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lifts_page);
-        workout = (Workout) getIntent().getSerializableExtra("choosenWorkout");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    workout = (Workout) getIntent().getSerializableExtra("choosenWorkout");
         lsLifts=(ListView) findViewById(R.id.liftsListView);
         txtDate=(EditText) findViewById(R.id.txtDateLiftsPage);
         txtDescription=(EditText) findViewById(R.id.txtDescriptionLiftsPage);
         txtNotes=(EditText) findViewById(R.id.txtNotesLiftsPage);
-        txtDate.setText(workout.getDateStr());
-        txtDescription.setText(workout.getDescription());
-        txtNotes.setText(workout.getNotes());
-        lifts=new ArrayList<Lift>(workout.getLifts());
+        if(workout!=null) {
+            txtDate.setText(workout.getDateStr());
+            txtDescription.setText(workout.getDescription());
+            txtNotes.setText(workout.getNotes());
 
-        arrayAdapter=new ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, lifts);
-        lsLifts.setAdapter(arrayAdapter);
-        lsLifts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
-                Lift choosenLift = lifts.get(position);
-                Intent intent = new Intent(LiftsPage.this, SetsPage.class);
-                intent.putExtra("choosenLift",choosenLift);
-                startActivityForResult(intent, EDIT_LIFT_ID);
-            }
-        });
+            lifts = new ArrayList<Lift>(workout.getLifts());
+
+            arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, lifts);
+            lsLifts.setAdapter(arrayAdapter);
+            lsLifts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
+                    Lift choosenLift = lifts.get(position);
+                    Intent intent = new Intent(LiftsPage.this, SetsPage.class);
+                    // Use TaskStackBuilder to build the back stack and get the PendingIntent
+                    PendingIntent pendingIntent =
+                            TaskStackBuilder.create(LiftsPage.this)
+                                    // add all of DetailsActivity's parents to the stack,
+                                    // followed by DetailsActivity itself
+                                    .addNextIntentWithParentStack(intent)
+                                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(LiftsPage.this);
+                    builder.setContentIntent(pendingIntent);
+                    intent.putExtra("choosenLift", choosenLift);
+                    startActivityForResult(intent, EDIT_LIFT_ID);
+                }
+            });
+        }
     }
-
+    //https://stackoverflow.com/questions/14545139/android-back-button-in-the-title-bar
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
     public void addLift(View view) {
         Intent intent = new Intent(this, SetsPage.class);
         intent.putExtra("choosenLift",new Lift(findMaxid()+1, "","", new ArrayList<Set>()));
@@ -61,11 +94,31 @@ public class LiftsPage extends AppCompatActivity {
     }
 
     public void delLift(View view){
-        workout.setDate(null);
-        Intent intent=new Intent(LiftsPage.this, MainActivity.class);
-        intent.putExtra("workout", workout);
-        setResult(Activity.RESULT_OK, intent);
-        finish();
+        //https://stackoverflow.com/questions/36747369/how-to-show-a-pop-up-in-android-studio-to-confirm-an-order
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setTitle("Confirm Delete");
+        builder.setMessage("Are you sure you want to delete this workout?");
+        builder.setPositiveButton("Confirm Delete",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        workout.setDate(null);
+                        Intent intent=new Intent(LiftsPage.this, MainActivity.class);
+                        intent.putExtra("workout", workout);
+                        setResult(Activity.RESULT_OK, intent);
+                        finish();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
     public void saveLift(View view){
