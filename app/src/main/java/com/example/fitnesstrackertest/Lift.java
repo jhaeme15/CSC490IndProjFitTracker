@@ -7,10 +7,20 @@ public class Lift implements Serializable {
     private String lift;
     private ArrayList<Set> sets;
     private int id;
+    private String notes;
 
-    public Lift(String lift){
+    public Lift(int id, String lift, String notes){
         this.lift=lift;
         this.sets=new ArrayList<Set>();
+        this.id=id;
+        this.notes=notes;
+    }
+
+    public Lift(int id, String lift, String notes, ArrayList<Set> sets){
+        this.id=id;
+        this.lift=lift;
+        this.sets=new ArrayList<Set>(sets);
+        this.notes=notes;
     }
 
     public int getId() {
@@ -21,11 +31,14 @@ public class Lift implements Serializable {
         this.id = id;
     }
 
-    public Lift(int id, String lift, ArrayList<Set> sets){
-        this.id=id;
-        this.lift=lift;
-        this.sets=new ArrayList<Set>(sets);
+    public String getNotes() {
+        return notes;
     }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
     public String getLift() {
         return lift;
     }

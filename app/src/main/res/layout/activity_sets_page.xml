@@ -10,10 +10,26 @@
 
     <EditText
         android:id="@+id/editTxtSetsPageLiftType"
-        android:layout_width="200dp"
+        android:layout_width="250dp"
         android:layout_height="50dp"
-        android:layout_margin="25dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="25dp"
         android:hint="Lift Type"/>
+    <EditText
+        android:id ="@+id/txtNotesSetsPage"
+        android:layout_width ="250dp"
+        android:layout_height ="wrap_content"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLines ="4"
+        android:maxLength ="2000"
+        android:hint ="Notes"
+        android:scrollHorizontally="false"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginBottom="25dp"
+        android:layout_marginTop="10dp"/>
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

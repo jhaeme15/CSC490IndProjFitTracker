@@ -22,6 +22,7 @@ public class LiftsPage extends AppCompatActivity {
     private ListView lsLifts;
     private EditText txtDate;
     private EditText txtDescription;
+    private EditText txtNotes;
     private  Workout workout;
 
     public static final int CREATE_LIFT_ID = 100;
@@ -34,8 +35,10 @@ public class LiftsPage extends AppCompatActivity {
         lsLifts=(ListView) findViewById(R.id.liftsListView);
         txtDate=(EditText) findViewById(R.id.txtDateLiftsPage);
         txtDescription=(EditText) findViewById(R.id.txtDescriptionLiftsPage);
+        txtNotes=(EditText) findViewById(R.id.txtNotesLiftsPage);
         txtDate.setText(workout.getDateStr());
         txtDescription.setText(workout.getDescription());
+        txtNotes.setText(workout.getNotes());
         lifts=new ArrayList<Lift>(workout.getLifts());
 
         arrayAdapter=new ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, lifts);
@@ -53,7 +56,7 @@ public class LiftsPage extends AppCompatActivity {
 
     public void addLift(View view) {
         Intent intent = new Intent(this, SetsPage.class);
-        intent.putExtra("choosenLift",new Lift(lifts.size()+1, "", new ArrayList<Set>()));
+        intent.putExtra("choosenLift",new Lift(findMaxid()+1, "","", new ArrayList<Set>()));
         startActivityForResult(intent, CREATE_LIFT_ID);
     }
 
@@ -69,6 +72,7 @@ public class LiftsPage extends AppCompatActivity {
         boolean valid=true;
         String description=txtDescription.getText().toString();
         String date=txtDate.getText().toString();
+        String notes=txtNotes.getText().toString();
         String[] dateSplit=new String[0];
         if(date.indexOf("/")>0) {
             dateSplit = date.split("/");
@@ -83,6 +87,7 @@ public class LiftsPage extends AppCompatActivity {
         }else{
             valid=false;
         }
+        workout.setNotes(notes);
         if(dateSplit.length==3){
             if(tryParseInt(dateSplit[0])&&tryParseInt(dateSplit[1])&&tryParseInt(dateSplit[2])) {
                 int month=Integer.parseInt(dateSplit[0]);
@@ -118,7 +123,7 @@ public class LiftsPage extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Lift newLift = (Lift) data.getSerializableExtra("lift");
-                if(newLift!=null) {
+                if(newLift.getLift()!=null) {
                     lifts.add(newLift);
                 }
 
@@ -177,6 +182,16 @@ public class LiftsPage extends AppCompatActivity {
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public int findMaxid(){
+        int max=0;
+        for (Lift lift: lifts){
+            if(lift.getId()>max){
+                max=lift.getId();
+            }
+        }
+        return max;
     }
 
 }

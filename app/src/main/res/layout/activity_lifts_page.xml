@@ -19,6 +19,7 @@
         android:ems="10"
         android:inputType="date"
          />
+
     <EditText
         android:id="@+id/txtDescriptionLiftsPage"
         android:layout_width="250dp"
@@ -28,6 +29,19 @@
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
         android:hint="Description"/>
+    <EditText
+        android:id ="@+id/txtNotesLiftsPage"
+        android:layout_width ="250dp"
+        android:layout_height ="wrap_content"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLines ="4"
+        android:maxLength ="2000"
+        android:hint ="Notes"
+        android:scrollHorizontally="false"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"/>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -40,7 +54,8 @@
             android:layout_marginTop="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_toLeftOf="@id/btnAddLift"
+
+            android:layout_centerHorizontal="true"
             android:onClick="saveLift"
             android:text="Save" />
 
@@ -53,7 +68,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
         android:onClick="addLift"
-        android:layout_centerHorizontal="true"
+        android:layout_toLeftOf="@id/btnSaveWorkout"
         android:text="Add Lift" />
 
         <Button
@@ -64,7 +79,7 @@
             android:layout_marginTop="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_toRightOf="@id/btnAddLift"
+            android:layout_toRightOf="@id/btnSaveWorkout"
             android:onClick="delLift"
             android:text="Delete" />
 

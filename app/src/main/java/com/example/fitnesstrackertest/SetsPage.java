@@ -3,9 +3,7 @@ package com.example.fitnesstrackertest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.renderscript.ScriptGroup;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
@@ -23,7 +21,8 @@ public class SetsPage extends AppCompatActivity {
     private Button btnAddSet;
     private Button btnDeleteLift;
     private RelativeLayout btnLayout;
-    private EditText liftType;
+    private EditText txtLiftType;
+    private EditText txtNotes;
     private Button btnsaveChanges;
     private ArrayList<Integer> weightsIds;
     private ArrayList<Integer> repsids;
@@ -37,14 +36,16 @@ public class SetsPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sets_page);
         lift = (Lift) getIntent().getSerializableExtra("choosenLift");
-        liftType=(EditText) findViewById(R.id.editTxtSetsPageLiftType) ;
+        txtLiftType =(EditText) findViewById(R.id.editTxtSetsPageLiftType) ;
+        txtNotes=(EditText) findViewById(R.id.txtNotesSetsPage);
         setNum=1;
         setsViewList=new ArrayList<RelativeLayout>();
         weightsIds=new ArrayList<Integer>();
         repsids=new ArrayList<Integer>();
         linearLayout=(LinearLayout) findViewById(R.id.lin_layout_setsPage);
             setNum=lift.getSets().size()+1;
-            liftType.setText(lift.getLift());
+            txtLiftType.setText(lift.getLift());
+            txtNotes.setText(lift.getNotes());
             ArrayList<Set> sets=lift.getSets();
 
             for (int i=0; i<sets.size(); i++){
@@ -196,7 +197,8 @@ public class SetsPage extends AppCompatActivity {
             public void onClick(View v) {
                 boolean valid=true;
                 ArrayList<Set> sets=new ArrayList<Set>();
-                String liftName=liftType.getText().toString();
+                String liftName= txtLiftType.getText().toString();
+                String notes=txtNotes.getText().toString();
 
 
                 if(liftName.trim()!=null || !liftName.trim().equals("")){
@@ -204,6 +206,7 @@ public class SetsPage extends AppCompatActivity {
                 }else{
                     valid=false;
                 }
+                lift.setNotes(notes);
                 for (int i=0; i<setsViewList.size(); i++){
                     RelativeLayout relativeLayout=setsViewList.get(i);
                     EditText txtWeights=relativeLayout.findViewById(weightsIds.get(i));
