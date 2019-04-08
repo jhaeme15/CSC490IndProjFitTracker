@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.AdapterView;
@@ -13,9 +14,13 @@ import android.widget.Button;
 import android.view.View;
 
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -33,34 +38,24 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        database=FirebaseDatabase.getInstance().getReference("current workouts");
         lvWorkout = (ListView) findViewById(R.id.workoutListView);
         btnAddWorkout1 = (Button) findViewById(R.id.btnAddWorkout);
         workouts = new ArrayList<Workout>();
-        ArrayList<Lift> testLift=new ArrayList<Lift>();
-        ArrayList<Set> setTest=new ArrayList<Set>();
-        setTest.add(new Set(1,165, 10));
-        setTest.add(new Set(2,175, 10));
-        setTest.add(new Set(3,185, 10));
-        testLift.add(new Lift(1,"Bench","", setTest));
-        testLift.add(new Lift(2, "Squat","", setTest));
-        testLift.add(new Lift(3,"Deadlift","", setTest));
-        workouts.add(new Workout(1,LocalDate.now(), "test2","", testLift));
-        workouts.add(new Workout(2,LocalDate.now(), "test3","", testLift));
-        workouts.add(new Workout(3,LocalDate.now(), "test4","", testLift));
-        database = FirebaseDatabase.getInstance().getReference();
-        arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, workouts);
-        lvWorkout.setAdapter(arrayAdapter);
-        // https:stackoverflow.com/questions/18405299/onitemclicklistener-using-arrayadapter-for-listview
-        lvWorkout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
-                Workout choosenWorkout = workouts.get(position);
-                Intent intent = new Intent(MainActivity.this, LiftsPage.class);
-                intent.putExtra("choosenWorkout",choosenWorkout);
-                startActivityForResult(intent, EDIT_WORKOUT_ID);
-            }
-        });
+
+//        ArrayList<Lift> testLift=new ArrayList<Lift>();
+//        ArrayList<Set> setTest=new ArrayList<Set>();
+//        setTest.add(new Set(1,165, 10));
+//        setTest.add(new Set(2,175, 10));
+//        setTest.add(new Set(3,185, 10));
+//        testLift.add(new Lift(1,"Bench","", setTest));
+//        testLift.add(new Lift(2, "Squat","", setTest));
+//        testLift.add(new Lift(3,"Deadlift","", setTest));
+//        workouts.add(new Workout(1,LocalDate.now(), "test2","", testLift));
+//        workouts.add(new Workout(2,LocalDate.now(), "test3","", testLift));
+//        workouts.add(new Workout(3,LocalDate.now(), "test4","", testLift));
+        database = FirebaseDatabase.getInstance().getReference("current workouts");
+        databaseListener();
 
     }
 
@@ -115,6 +110,55 @@ public class MainActivity extends AppCompatActivity {
         }
         return max;
     }
+    public void databaseListener(){
+        database.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshotWorkout: dataSnapshot.getChildren()){
+
+                    String description=snapshotWorkout.child("description").getValue().toString();
+                    String date=snapshotWorkout.child("date").getValue().toString();
+                    int id=Integer.parseInt(snapshotWorkout.child("id").getValue().toString());
+                    String notes=snapshotWorkout.child("notes").getValue().toString();
+                    ArrayList<Lift> lifts=new ArrayList<Lift>();
+                    for(DataSnapshot snapshotLifts: snapshotWorkout.child("lifts").getChildren()){
+                        String liftName=snapshotLifts.child("liftName").getValue().toString();
+                        int liftId=Integer.parseInt(snapshotLifts.child("id").getValue().toString());
+                        String liftNotes=snapshotLifts.child("notes").getValue().toString();
+                        ArrayList<Set> sets=new ArrayList<Set>();
+                        for(DataSnapshot snapshotSets: snapshotLifts.child("sets").getChildren()){
+                            int setId=Integer.parseInt(snapshotSets.child("id").getValue().toString());
+                            int reps=Integer.parseInt(snapshotSets.child("reps").getValue().toString());
+                            int weight=Integer.parseInt(snapshotSets.child("weight").getValue().toString());
+                            sets.add(new Set(setId, weight, reps));
+                        }
+                        lifts.add(new Lift(liftId, liftName, liftNotes, sets));
+                    }
+
+                    workouts.add(new Workout(id, LocalDate.parse(date), description, notes, lifts));
+                }
+                arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
+                lvWorkout.setAdapter(arrayAdapter);
+                // https:stackoverflow.com/questions/18405299/onitemclicklistener-using-arrayadapter-for-listview
+                lvWorkout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
+                        Workout choosenWorkout = workouts.get(position);
+                        Intent intent = new Intent(MainActivity.this, LiftsPage.class);
+                        intent.putExtra("choosenWorkout",choosenWorkout);
+                        startActivityForResult(intent, EDIT_WORKOUT_ID);
+                    }
+                });
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 }
 
 

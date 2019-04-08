@@ -4,21 +4,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Lift implements Serializable {
-    private String lift;
+    private String liftName;
     private ArrayList<Set> sets;
     private int id;
     private String notes;
 
-    public Lift(int id, String lift, String notes){
-        this.lift=lift;
+    public Lift(int id, String liftName, String notes){
+        this.liftName = liftName;
         this.sets=new ArrayList<Set>();
         this.id=id;
         this.notes=notes;
     }
 
-    public Lift(int id, String lift, String notes, ArrayList<Set> sets){
+    public Lift(int id, String liftName, String notes, ArrayList<Set> sets){
         this.id=id;
-        this.lift=lift;
+        this.liftName = liftName;
         this.sets=new ArrayList<Set>(sets);
         this.notes=notes;
     }
@@ -39,12 +39,12 @@ public class Lift implements Serializable {
         this.notes = notes;
     }
 
-    public String getLift() {
-        return lift;
+    public String getLiftName() {
+        return liftName;
     }
 
-    public void setLift(String lift) {
-        this.lift = lift;
+    public void setLiftName(String liftName) {
+        this.liftName = liftName;
     }
 
     public ArrayList<Set> getSets() {
@@ -57,7 +57,7 @@ public class Lift implements Serializable {
 
     @Override
     public String toString(){
-        String display=lift+"\n";
+        String display= liftName +"\n";
         if(sets.size()>0) {
             display += sets.get(0).toString();
             for (int i = 1; i < sets.size(); i++) {

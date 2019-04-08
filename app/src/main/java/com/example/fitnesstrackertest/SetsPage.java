@@ -49,7 +49,7 @@ public class SetsPage extends AppCompatActivity {
         repsids=new ArrayList<Integer>();
         linearLayout=(LinearLayout) findViewById(R.id.lin_layout_setsPage);
             setNum=lift.getSets().size()+1;
-            txtLiftType.setText(lift.getLift());
+            txtLiftType.setText(lift.getLiftName());
             txtNotes.setText(lift.getNotes());
             ArrayList<Set> sets=lift.getSets();
 
@@ -196,7 +196,7 @@ public class SetsPage extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                lift.setLift(null);
+                                lift.setLiftName(null);
                                 Intent intent=new Intent(SetsPage.this, LiftsPage.class);
                                 intent.putExtra("lift", lift);
                                 setResult(Activity.RESULT_OK, intent);
@@ -224,7 +224,7 @@ public class SetsPage extends AppCompatActivity {
 
 
                 if(liftName.trim()!=null || !liftName.trim().equals("")){
-                    lift.setLift(liftName);
+                    lift.setLiftName(liftName);
                 }else{
                     valid=false;
                 }

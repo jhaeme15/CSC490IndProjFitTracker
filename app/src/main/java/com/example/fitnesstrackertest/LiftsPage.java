@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -176,7 +175,7 @@ public class LiftsPage extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Lift newLift = (Lift) data.getSerializableExtra("lift");
-                if(newLift.getLift()!=null) {
+                if(newLift.getLiftName()!=null) {
                     lifts.add(newLift);
                 }
 
@@ -185,7 +184,7 @@ public class LiftsPage extends AppCompatActivity {
         else if(requestCode==EDIT_LIFT_ID){
             if (resultCode == RESULT_OK) {
                 Lift lift = (Lift) data.getSerializableExtra("lift");
-                if(lift.getLift()==null) {
+                if(lift.getLiftName()==null) {
                   for (int i=lifts.size()-1; i>=0; i--){
                       if (lift.getId()==lifts.get(i).getId()){
                           lifts.remove(i);
