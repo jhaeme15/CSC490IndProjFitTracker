@@ -1,30 +1,30 @@
 package com.example.fitnesstrackertest;
 
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Button;
 import android.view.View;
-
-
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+/**
+ * Author: Jared Haeme
+ * Date: 4/11/2019
+ * The first page of the app that displays a list view of the list of workouts and allows the user to add a workout. Also connects to firebase to store workouts
+ */
 public class MainActivity extends AppCompatActivity {
+    //Data fields
     private ListView lvWorkout;
     private Button btnAddWorkout1;
     private ArrayList<Workout> workouts;
@@ -33,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     public static final int EDIT_WORKOUT_ID = 2;
     private DatabaseReference database;
 
+    /**
+     * Initializes fields
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -59,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Action for when user chooses the add workout button that opens a new page for creating a new workout
+     * @param view the button for adding the workout
+     */
     public void addWorkout(View view) {
         Intent intent = new Intent(this, LiftsPage.class);
         intent.putExtra("choosenWorkout",new Workout(findMaxid()+1, LocalDate.now(), "","", new ArrayList<Lift>()));
@@ -66,10 +74,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * For when returning back to this page from another activity
+     * @param requestCode int the id for the activity
+     * @param resultCode int the result of the activity
+     * @param data Intent the data retunred from the activity
+     */
     //https://stackoverflow.com/questions/920306/sending-data-back-to-the-main-activity-in-android
     //https://developer.android.com/training/basics/intents/result
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //When retunring back from creating a new activity
         if (requestCode == CREATE_WORKOUT_ID) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -79,15 +94,18 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             }
+            //From returning back from editing an old activity
         } else if(requestCode==EDIT_WORKOUT_ID){
             if (resultCode == RESULT_OK) {
                 Workout workout = (Workout) data.getSerializableExtra("workout");
+                //delete an activity
                 if(workout.getDate()==null) {
                     for (int i = workouts.size()-1; i>=0; i--){
                         if (workout.getId()== workouts.get(i).getId()){
                             workouts.remove(i);
                         }
                     }
+                    //editing an activity
                 }else{
                     for (int i = workouts.size()-1; i>=0; i--){
                         if (workout.getId()== workouts.get(i).getId()){
@@ -99,8 +117,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+        //update listview
         arrayAdapter.notifyDataSetChanged();
     }
+
+    /**
+     * find the max id in the list of workouts
+     * @return int a unique max id
+     */
+
     public int findMaxid(){
         int max=0;
         for (Workout workout: workouts){
@@ -110,8 +135,13 @@ public class MainActivity extends AppCompatActivity {
         }
         return max;
     }
+
+    /**
+     * Get workout data from firebase
+     */
     public void databaseListener(){
         database.addValueEventListener(new ValueEventListener() {
+            //Gets data from firebase
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshotWorkout: dataSnapshot.getChildren()){
@@ -139,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
                 lvWorkout.setAdapter(arrayAdapter);
+                //gets selected item from listview and starts a new activity for editing that item
                 // https:stackoverflow.com/questions/18405299/onitemclicklistener-using-arrayadapter-for-listview
                 lvWorkout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
