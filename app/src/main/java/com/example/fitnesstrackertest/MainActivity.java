@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                         if (workout.getId()== workouts.get(i).getId()){
                             workouts.remove(i);
                             workouts.add(i,workout);
+                            database.child("workout"+Math.abs(workout.getId())).setValue(null);
                             addToFirebase(workout, database);
                         }
                     }

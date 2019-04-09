@@ -21,8 +21,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+/**
+ * Author: Jared Haeme
+ * Date: 4/11/2019
+ * Lifts page for displaying the lifts in a workout and allows for adding, and deleting changes
+ */
 
 public class LiftsPage extends AppCompatActivity {
+    //Data fields
     private ArrayList<Lift> lifts;
     private ArrayAdapter arrayAdapter;
     private ListView lsLifts;
@@ -30,9 +36,14 @@ public class LiftsPage extends AppCompatActivity {
     private EditText txtDescription;
     private EditText txtNotes;
     private  Workout workout;
-
+//Id for activities
     public static final int CREATE_LIFT_ID = 100;
     public static final int EDIT_LIFT_ID =200;
+
+    /**
+     * Intializes data fields and has listener for an item selected in the list view
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +63,7 @@ public class LiftsPage extends AppCompatActivity {
 
             arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, lifts);
             lsLifts.setAdapter(arrayAdapter);
+            //Opens new sets page activity when item selected in list view
             lsLifts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
@@ -73,27 +85,49 @@ public class LiftsPage extends AppCompatActivity {
             });
         }
     }
+
+    /**
+     * Code for back button
+     * @param item MenuItem
+     * @return boolean
+     */
     //https://stackoverflow.com/questions/14545139/android-back-button-in-the-title-bar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                saveLift();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * For back button
+     * @param menu MenuItem
+     * @return
+     */
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
     }
+
+    /**
+     * Happens when add lift button clicked. Starts activity which opens sets page
+     * @param view
+     */
     public void addLift(View view) {
         Intent intent = new Intent(this, SetsPage.class);
         intent.putExtra("choosenLift",new Lift(findMaxid()+1, "","", new ArrayList<Set>()));
         startActivityForResult(intent, CREATE_LIFT_ID);
     }
 
+    /**
+     * When the user clicks the delete workout button and deletes a workout
+     * @param view
+     */
     public void delLift(View view){
         //https://stackoverflow.com/questions/36747369/how-to-show-a-pop-up-in-android-studio-to-confirm-an-order
+        //opens pop up to confirm
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(true);
         builder.setTitle("Confirm Delete");
@@ -120,7 +154,11 @@ public class LiftsPage extends AppCompatActivity {
 
     }
 
-    public void saveLift(View view){
+    /**
+     * Saves and adds workout to workouts list
+     *
+     */
+    public void saveLift(){
         boolean valid=true;
         String description=txtDescription.getText().toString();
         String date=txtDate.getText().toString();
@@ -133,12 +171,7 @@ public class LiftsPage extends AppCompatActivity {
         }else{
             valid=false;
         }
-        if(description!=null){
            workout.setDescription(description);
-
-        }else{
-            valid=false;
-        }
         workout.setNotes(notes);
         if(dateSplit.length==3){
             if(tryParseInt(dateSplit[0])&&tryParseInt(dateSplit[1])&&tryParseInt(dateSplit[2])) {
@@ -164,11 +197,38 @@ public class LiftsPage extends AppCompatActivity {
             intent.putExtra("workout", workout);
             setResult(Activity.RESULT_OK, intent);
             finish();
+        }else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(LiftsPage.this);
+            builder.setCancelable(true);
+            builder.setTitle("Invalid Entry");
+            builder.setMessage("Entry is invalid. If you continue your changes will not be saved");
+            builder.setPositiveButton("Continue",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 
     //https://stackoverflow.com/questions/920306/sending-data-back-to-the-main-activity-in-android
     //https://developer.android.com/training/basics/intents/result
+
+    /**
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CREATE_LIFT_ID) {
@@ -204,6 +264,14 @@ public class LiftsPage extends AppCompatActivity {
         arrayAdapter.notifyDataSetChanged();
     }
 //from death calculator
+
+    /**
+     * Checks if date is valid
+     * @param month int month of date
+     * @param day int day of month
+     * @param year int year of date
+     * @return boolean if date is valid
+     */
     public boolean isValidDate(int month, int day, int year){
 
         if (year>=0&& month>=1 && month<=12){
@@ -227,6 +295,12 @@ public class LiftsPage extends AppCompatActivity {
      * @return
      */
     // got from https://stackoverflow.com/questions/8391979/does-java-have-a-int-tryparse-that-doesnt-throw-an-exception-for-bad-data
+
+    /**
+     * Checks if string value is an int
+     * @param value string
+     * @return boolen if string can be converted
+     */
     public boolean tryParseInt(String value) {
         try {
             Integer.parseInt(value);
@@ -236,6 +310,10 @@ public class LiftsPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Finds the max id
+     * @return int the max id
+     */
     public int findMaxid(){
         int max=0;
         for (Lift lift: lifts){
@@ -245,5 +323,12 @@ public class LiftsPage extends AppCompatActivity {
         }
         return max;
     }
+
+    //https://stackoverflow.com/questions/45729852/android-check-if-back-button-was-pressed?rq=1
+    @Override
+    public void onBackPressed() {
+        saveLift();
+    }
+
 
 }

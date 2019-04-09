@@ -27,7 +27,6 @@ public class SetsPage extends AppCompatActivity {
     private RelativeLayout btnLayout;
     private EditText txtLiftType;
     private EditText txtNotes;
-    private Button btnsaveChanges;
     private ArrayList<Integer> weightsIds;
     private ArrayList<Integer> repsids;
     private ArrayList<RelativeLayout> setsViewList;
@@ -148,11 +147,8 @@ public class SetsPage extends AppCompatActivity {
     public void createButtonUI(final LinearLayout linearLayout){
         btnAddSet =new Button(this);
         btnDeleteLift=new Button(this);
-        btnsaveChanges =new Button(this);
-        btnsaveChanges.setText("Save");
         btnAddSet.setText("Add");
-        btnDeleteLift.setText("Delete All");
-        btnsaveChanges.setId(View.generateViewId());
+        btnDeleteLift.setText("Delete");
         btnAddSet.setId(View.generateViewId());
         btnDeleteLift.setId(View.generateViewId());
         btnLayout=new RelativeLayout(this);
@@ -161,19 +157,16 @@ public class SetsPage extends AppCompatActivity {
         btnLayout.setLayoutParams(btnRelLayoutparams);
         RelativeLayout.LayoutParams btnAddSetParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams btnDeleteLiftParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        RelativeLayout.LayoutParams btnSaveParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        btnSaveParams.setMargins(10,0,10,0);
-        btnAddSetParams.setMargins(10, 0, 10, 0);
-        btnDeleteLiftParams.setMargins(10, 0, 10, 0);
-        btnSaveParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        btnAddSetParams.addRule(RelativeLayout.LEFT_OF, btnsaveChanges.getId());
-        btnDeleteLiftParams.addRule(RelativeLayout.RIGHT_OF, btnsaveChanges.getId());
+
+        btnAddSetParams.setMargins(75, 0, 10, 0);
+        btnDeleteLiftParams.setMargins(10, 0, 75, 0);
+        btnAddSetParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        btnDeleteLiftParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         btnAddSet.setLayoutParams(btnAddSetParams);
         btnDeleteLift.setLayoutParams(btnDeleteLiftParams);
-        btnsaveChanges.setLayoutParams(btnSaveParams);
+
         btnLayout.addView(btnAddSet, btnAddSetParams);
         btnLayout.addView(btnDeleteLift, btnDeleteLiftParams);
-        btnLayout.addView(btnsaveChanges, btnSaveParams);
 
         linearLayout.addView(btnLayout, btnRelLayoutparams);
         btnAddSet.setOnClickListener(new View.OnClickListener() {
@@ -215,54 +208,6 @@ public class SetsPage extends AppCompatActivity {
             }
         });
 
-        btnsaveChanges.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                boolean valid=true;
-                ArrayList<Set> sets=new ArrayList<Set>();
-                String liftName= txtLiftType.getText().toString();
-                String notes=txtNotes.getText().toString();
-
-
-                if(liftName.trim()!=null || !liftName.trim().equals("")){
-                    lift.setLiftName(liftName);
-                }else{
-                    valid=false;
-                }
-                lift.setNotes(notes);
-                for (int i=0; i<setsViewList.size(); i++){
-                    RelativeLayout relativeLayout=setsViewList.get(i);
-                    EditText txtWeights=relativeLayout.findViewById(weightsIds.get(i));
-                    EditText txtReps=relativeLayout.findViewById(repsids.get(i));
-                    String weightStr=txtWeights.getText().toString();
-                    String repsStr=txtReps.getText().toString();
-                    int weight=0;
-                    int reps=0;
-                    if (tryParseInt(weightStr)){
-                        weight=Integer.parseInt(weightStr);
-                    }else{
-
-
-                        valid=false;
-                    }
-                    if (tryParseInt(repsStr)){
-                        reps=Integer.parseInt(repsStr);
-                    }else{
-                        valid=false;
-                    }
-                    if(valid) {
-                        Set set=new Set(i+1, weight, reps);
-                        sets.add(set);
-                    }
-                }
-                if(valid) {
-                    lift.setSets(sets);
-                    Intent intent = new Intent(SetsPage.this, LiftsPage.class);
-                    intent.putExtra("lift", lift);
-                    setResult(Activity.RESULT_OK, intent);
-                    finish();
-                }
-            }
-        });
     }
 
 
@@ -271,13 +216,19 @@ public class SetsPage extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                saveData();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
+    }
+
+    //https://stackoverflow.com/questions/45729852/android-check-if-back-button-was-pressed?rq=1
+    @Override
+    public void onBackPressed() {
+       saveData();
     }
 
     // got from https://stackoverflow.com/questions/8391979/does-java-have-a-int-tryparse-that-doesnt-throw-an-exception-for-bad-data
@@ -316,6 +267,73 @@ public class SetsPage extends AppCompatActivity {
 
 
             }
+    }
+
+    public void saveData(){
+        boolean valid=true;
+        ArrayList<Set> sets=new ArrayList<Set>();
+        String liftName= txtLiftType.getText().toString();
+        String notes=txtNotes.getText().toString();
+
+
+        if(!liftName.matches("")){
+            lift.setLiftName(liftName);
+        }else{
+            valid=false;
+        }
+        lift.setNotes(notes);
+        for (int i=0; i<setsViewList.size(); i++){
+            RelativeLayout relativeLayout=setsViewList.get(i);
+            EditText txtWeights=relativeLayout.findViewById(weightsIds.get(i));
+            EditText txtReps=relativeLayout.findViewById(repsids.get(i));
+            String weightStr=txtWeights.getText().toString();
+            String repsStr=txtReps.getText().toString();
+            int weight=0;
+            int reps=0;
+            if (tryParseInt(weightStr)){
+                weight=Integer.parseInt(weightStr);
+            }else{
+
+
+                valid=false;
+            }
+            if (tryParseInt(repsStr)){
+                reps=Integer.parseInt(repsStr);
+            }else{
+                valid=false;
+            }
+            if(valid) {
+                Set set=new Set(i+1, weight, reps);
+                sets.add(set);
+            }
+        }
+        if(valid) {
+            lift.setSets(sets);
+            Intent intent = new Intent(SetsPage.this, LiftsPage.class);
+            intent.putExtra("lift", lift);
+            setResult(Activity.RESULT_OK, intent);
+            finish();
+        }else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(SetsPage.this);
+            builder.setCancelable(true);
+            builder.setTitle("Invalid Entry");
+            builder.setMessage("Entry is invalid. If you continue your changes will not be saved");
+            builder.setPositiveButton("Continue",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
     }
 
 
