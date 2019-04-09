@@ -3,6 +3,7 @@ import android.app.LoaderManager;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -139,12 +140,23 @@ public class Workout implements Serializable {
      */
     public String getDateStr(){
         if(date!=null) {
-            return date.getMonthValue() + "/" + date.getDayOfMonth() + "/" + date.getYear();
+            return date.format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
         }else{
             return "";
         }
     }
 
+    /**
+     *
+     * @return String formatting the date for firebase storage
+     */
+    public String getFirebaseDateStr(){
+        if(date!=null) {
+            return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }else{
+            return "";
+        }
+    }
     /**
      *
      * @return a string representation that gives the workout and discription

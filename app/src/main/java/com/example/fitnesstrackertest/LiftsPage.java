@@ -102,7 +102,7 @@ public class LiftsPage extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        workout.setDate(null);
+                        workout.setId(workout.getId()*-1);
                         Intent intent=new Intent(LiftsPage.this, MainActivity.class);
                         intent.putExtra("workout", workout);
                         setResult(Activity.RESULT_OK, intent);
@@ -184,9 +184,9 @@ public class LiftsPage extends AppCompatActivity {
         else if(requestCode==EDIT_LIFT_ID){
             if (resultCode == RESULT_OK) {
                 Lift lift = (Lift) data.getSerializableExtra("lift");
-                if(lift.getLiftName()==null) {
+                if(lift.getId()<0) {
                   for (int i=lifts.size()-1; i>=0; i--){
-                      if (lift.getId()==lifts.get(i).getId()){
+                      if (Math.abs(lift.getId())==Math.abs(lifts.get(i).getId())){
                           lifts.remove(i);
                       }
                   }

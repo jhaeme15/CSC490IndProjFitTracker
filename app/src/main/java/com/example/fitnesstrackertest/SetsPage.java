@@ -196,7 +196,7 @@ public class SetsPage extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                lift.setLiftName(null);
+                               lift.setId(lift.getId()*-1);
                                 Intent intent=new Intent(SetsPage.this, LiftsPage.class);
                                 intent.putExtra("lift", lift);
                                 setResult(Activity.RESULT_OK, intent);

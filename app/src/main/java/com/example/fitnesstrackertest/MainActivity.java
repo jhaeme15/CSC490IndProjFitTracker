@@ -46,18 +46,6 @@ public class MainActivity extends AppCompatActivity {
         lvWorkout = (ListView) findViewById(R.id.workoutListView);
         btnAddWorkout1 = (Button) findViewById(R.id.btnAddWorkout);
         workouts = new ArrayList<Workout>();
-
-//        ArrayList<Lift> testLift=new ArrayList<Lift>();
-//        ArrayList<Set> setTest=new ArrayList<Set>();
-//        setTest.add(new Set(1,165, 10));
-//        setTest.add(new Set(2,175, 10));
-//        setTest.add(new Set(3,185, 10));
-//        testLift.add(new Lift(1,"Bench","", setTest));
-//        testLift.add(new Lift(2, "Squat","", setTest));
-//        testLift.add(new Lift(3,"Deadlift","", setTest));
-//        workouts.add(new Workout(1,LocalDate.now(), "test2","", testLift));
-//        workouts.add(new Workout(2,LocalDate.now(), "test3","", testLift));
-//        workouts.add(new Workout(3,LocalDate.now(), "test4","", testLift));
         database = FirebaseDatabase.getInstance().getReference("current workouts");
         databaseListener();
 
@@ -91,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
                 Workout newWorkout = (Workout) data.getSerializableExtra("workout");
                 if(newWorkout.getDate()!=null) {
                     workouts.add(newWorkout);
+                    addToFirebase(newWorkout, database);
+
                 }
 
             }
@@ -99,10 +89,14 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Workout workout = (Workout) data.getSerializableExtra("workout");
                 //delete an activity
-                if(workout.getDate()==null) {
+                if(workout.getId()<0) {
                     for (int i = workouts.size()-1; i>=0; i--){
-                        if (workout.getId()== workouts.get(i).getId()){
+                        if (Math.abs(workout.getId())== Math.abs(workouts.get(i).getId())){
                             workouts.remove(i);
+                            DatabaseReference newRef=database.getParent().child("deleted workouts");
+                            addToFirebase(workout, newRef);
+                            database.child("workout"+Math.abs(workout.getId())).setValue(null);
+
                         }
                     }
                     //editing an activity
@@ -111,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                         if (workout.getId()== workouts.get(i).getId()){
                             workouts.remove(i);
                             workouts.add(i,workout);
+                            addToFirebase(workout, database);
                         }
                     }
                 }
@@ -140,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
      * Get workout data from firebase
      */
     public void databaseListener(){
-        database.addValueEventListener(new ValueEventListener() {
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
             //Gets data from firebase
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -189,7 +184,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    //https://firebase.google.com/docs/database/android/read-and-write
 
+    /**
+     * Add data to firebase
+     * @param workout adds a workout to firebase
+     * @param databaseRef the appropriate data reference
+     */
+    public void addToFirebase(Workout workout, DatabaseReference databaseRef){
+        databaseRef.child("workout"+workout.getId()).child("date").setValue(workout.getFirebaseDateStr());
+        databaseRef.child("workout"+workout.getId()).child("description").setValue(workout.getDescription());
+        databaseRef.child("workout"+workout.getId()).child("notes").setValue(workout.getNotes());
+        databaseRef.child("workout"+workout.getId()).child("id").setValue(workout.getId());
+        for(Lift lift: workout.getLifts()){
+            databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("id").setValue(lift.getId());
+            databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("liftName").setValue(lift.getLiftName());
+            databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("notes").setValue(lift.getNotes());
+            for(Set set: lift.getSets()){
+                databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("id").setValue(set.getId());
+                databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("reps").setValue(set.getReps());
+                databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("weight").setValue(set.getWeight());
+            }
+        }
+    }
 }
 
 
