@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +17,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -32,10 +39,12 @@ public class LiftsPage extends AppCompatActivity {
     private ArrayList<Lift> lifts;
     private ArrayAdapter arrayAdapter;
     private ListView lsLifts;
+    private ListView lvCopy;
     private EditText txtDate;
     private EditText txtDescription;
     private EditText txtNotes;
     private  Workout workout;
+    private DatabaseReference database;
 //Id for activities
     public static final int CREATE_LIFT_ID = 100;
     public static final int EDIT_LIFT_ID =200;
@@ -49,7 +58,9 @@ public class LiftsPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lifts_page);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        lvCopy=findViewById(R.id.lvCopy);
     workout = (Workout) getIntent().getSerializableExtra("choosenWorkout");
+        database= FirebaseDatabase.getInstance().getReference("current workouts");
         lsLifts=(ListView) findViewById(R.id.liftsListView);
         txtDate=(EditText) findViewById(R.id.txtDateLiftsPage);
         txtDescription=(EditText) findViewById(R.id.txtDescriptionLiftsPage);
@@ -69,16 +80,6 @@ public class LiftsPage extends AppCompatActivity {
                 public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
                     Lift choosenLift = lifts.get(position);
                     Intent intent = new Intent(LiftsPage.this, SetsPage.class);
-                    // Use TaskStackBuilder to build the back stack and get the PendingIntent
-                    PendingIntent pendingIntent =
-                            TaskStackBuilder.create(LiftsPage.this)
-                                    // add all of DetailsActivity's parents to the stack,
-                                    // followed by DetailsActivity itself
-                                    .addNextIntentWithParentStack(intent)
-                                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(LiftsPage.this);
-                    builder.setContentIntent(pendingIntent);
                     intent.putExtra("choosenLift", choosenLift);
                     startActivityForResult(intent, EDIT_LIFT_ID);
                 }
@@ -96,7 +97,11 @@ public class LiftsPage extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                saveLift();
+                if(lvCopy.isShown()){
+                    lvCopy.setVisibility(View.GONE);
+                }else {
+                    saveLift();
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -327,8 +332,69 @@ public class LiftsPage extends AppCompatActivity {
     //https://stackoverflow.com/questions/45729852/android-check-if-back-button-was-pressed?rq=1
     @Override
     public void onBackPressed() {
-        saveLift();
+        if(lvCopy.isShown()){
+            lvCopy.setVisibility(View.GONE);
+        }else {
+            saveLift();
+        }
     }
+
+    public void copyBtn(View view){
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
+            //Gets data from firebase
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ArrayList<Workout> workouts=new ArrayList<Workout>();
+                for(DataSnapshot snapshotWorkout: dataSnapshot.getChildren()){
+
+                    String description=snapshotWorkout.child("description").getValue().toString();
+                    String date=snapshotWorkout.child("date").getValue().toString();
+                    int id=Integer.parseInt(snapshotWorkout.child("id").getValue().toString());
+                    String notes=snapshotWorkout.child("notes").getValue().toString();
+                    ArrayList<Lift> loadedLifts=new ArrayList<Lift>();
+                    for(DataSnapshot snapshotLifts: snapshotWorkout.child("lifts").getChildren()){
+                        String liftName=snapshotLifts.child("liftName").getValue().toString();
+                        int liftId=Integer.parseInt(snapshotLifts.child("id").getValue().toString());
+                        String liftNotes=snapshotLifts.child("notes").getValue().toString();
+                        ArrayList<Set> sets=new ArrayList<Set>();
+                        for(DataSnapshot snapshotSets: snapshotLifts.child("sets").getChildren()){
+                            int setId=Integer.parseInt(snapshotSets.child("id").getValue().toString());
+                            int reps=Integer.parseInt(snapshotSets.child("reps").getValue().toString());
+                            int weight=Integer.parseInt(snapshotSets.child("weight").getValue().toString());
+                            sets.add(new Set(setId, weight, reps));
+                        }
+                        loadedLifts.add(new Lift(liftId, liftName, liftNotes, sets));
+                    }
+
+                    workouts.add(new Workout(id, LocalDate.parse(date), description, notes, loadedLifts));
+                }
+
+                ArrayAdapter arrayAdapterCopy = new ArrayAdapter(LiftsPage.this, android.R.layout.simple_expandable_list_item_1,  workouts);
+                lvCopy.setAdapter(arrayAdapterCopy);
+                lvCopy.setVisibility(View.VISIBLE);
+                lvCopy.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
+                        Workout choosenWorkout = workouts.get(position);
+                        workout.setLifts(choosenWorkout.getLifts());
+                        lifts=choosenWorkout.getLifts();
+                        arrayAdapter.addAll(lifts);
+                        arrayAdapter.notifyDataSetChanged();
+                        lvCopy.setVisibility(View.GONE);
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+    }
+
 
 
 }

@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         lvWorkout = (ListView) findViewById(R.id.workoutListView);
         btnAddWorkout1 = (Button) findViewById(R.id.btnAddWorkout);
         workouts = new ArrayList<Workout>();
-        database = FirebaseDatabase.getInstance().getReference("current workouts");
         databaseListener();
 
     }

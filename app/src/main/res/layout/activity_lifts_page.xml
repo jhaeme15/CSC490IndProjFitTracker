@@ -7,7 +7,13 @@
     android:orientation="vertical"
     android:focusableInTouchMode="true"
     tools:context=".LiftsPage">
+<ListView
+    android:id="@+id/lvCopy"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone">
 
+</ListView>
     <EditText
         android:id="@+id/txtDateLiftsPage"
         android:layout_width="250dp"
@@ -47,17 +53,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
+        <Button
+            android:id="@+id/btnCopy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:onClick="copyBtn"
+            android:text="Copy" />
     <Button
         android:id="@+id/btnAddLift"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="75dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
         android:onClick="addLift"
-        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/btnCopy"
         android:text="Add Lift" />
 
         <Button
@@ -66,9 +82,9 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:layout_marginRight="75dp"
+            android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
-            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@id/btnCopy"
             android:onClick="delLift"
             android:text="Delete" />
 
