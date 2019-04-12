@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Button;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,6 +45,7 @@ public class LiftsPage extends AppCompatActivity {
     private ListView lsLifts;
     private ListView lvCopy;
     private EditText txtDate;
+    private Button btnCopy;
     private AutoCompleteTextView txtDescription;
     private EditText txtNotes;
     private  Workout workout;
@@ -64,7 +66,9 @@ public class LiftsPage extends AppCompatActivity {
         setContentView(R.layout.activity_lifts_page);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         lvCopy=findViewById(R.id.lvCopy);
+        btnCopy=(Button) findViewById(R.id.btnCopy) ;
     workout = (Workout) getIntent().getSerializableExtra("choosenWorkout");
+
         database= FirebaseDatabase.getInstance().getReference("current workouts");
         lsLifts=(ListView) findViewById(R.id.liftsListView);
         txtDate=(EditText) findViewById(R.id.txtDateLiftsPage);
@@ -90,6 +94,9 @@ public class LiftsPage extends AppCompatActivity {
                     startActivityForResult(intent, EDIT_LIFT_ID);
                 }
             });
+        }
+        if(lifts.size()>0) {
+            btnCopy.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -170,39 +177,7 @@ public class LiftsPage extends AppCompatActivity {
      *
      */
     public void saveLift(){
-        boolean valid=true;
-        String description=txtDescription.getText().toString();
-        String date=txtDate.getText().toString();
-        String notes=txtNotes.getText().toString();
-        String[] dateSplit=new String[0];
-        if(date.indexOf("/")>0) {
-            dateSplit = date.split("/");
-        }else if(date.indexOf("-")>0){
-            dateSplit=date.split("-");
-        }else{
-            valid=false;
-        }
-           workout.setDescription(description);
-        workout.setNotes(notes);
-        if(dateSplit.length==3){
-            if(tryParseInt(dateSplit[0])&&tryParseInt(dateSplit[1])&&tryParseInt(dateSplit[2])) {
-                int month=Integer.parseInt(dateSplit[0]);
-                int day=Integer.parseInt(dateSplit[1]);
-                int year=Integer.parseInt(dateSplit[2]);
-                if (isValidDate(month,day,year)) {
-                    workout.setDate(LocalDate.of(year,month,day));
-                }else{
-                    valid=false;
-                }
-            }else {
-                valid=false;
-            }
-        }else {
-            valid=false;
-        }
-
-
-        if(valid){
+        if(addFieldsToWorkout()){
             workout.setLifts(lifts);
             Intent intent = new Intent(LiftsPage.this, MainActivity.class);
             intent.putExtra("workout", workout);
@@ -231,6 +206,44 @@ public class LiftsPage extends AppCompatActivity {
         }
     }
 
+    public boolean addFieldsToWorkout(){
+
+        String description=txtDescription.getText().toString();
+        String date=txtDate.getText().toString();
+        String notes=txtNotes.getText().toString();
+        String[] dateSplit=new String[0];
+        if(date.indexOf("/")>0) {
+            dateSplit = date.split("/");
+        }else if(date.indexOf("-")>0){
+            dateSplit=date.split("-");
+        }else{
+            return false;
+        }
+        workout.setDescription(description);
+        workout.setNotes(notes);
+        if(dateSplit.length==3){
+            if(tryParseInt(dateSplit[0])&&tryParseInt(dateSplit[1])&&tryParseInt(dateSplit[2])) {
+                int month=Integer.parseInt(dateSplit[0]);
+                int day=Integer.parseInt(dateSplit[1]);
+                int year=Integer.parseInt(dateSplit[2]);
+                if (isValidDate(month,day,year)) {
+                    workout.setDate(LocalDate.of(year,month,day));
+                }else{
+                    return false;
+                }
+            }else {
+                return false;
+            }
+        }else {
+            return false;
+        }
+
+        if(lifts.size()==0){
+            return false;
+        }
+        return true;
+    }
+
     //https://stackoverflow.com/questions/920306/sending-data-back-to-the-main-activity-in-android
     //https://developer.android.com/training/basics/intents/result
 
@@ -248,9 +261,9 @@ public class LiftsPage extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Lift newLift = (Lift) data.getSerializableExtra("lift");
                 if(newLift.getLiftName()!=null) {
-
-                    addToFirebase(newLift, newRef);
                     lifts.add(newLift);
+                    addToFirebase(newLift, newRef);
+
                 }
 
             }
@@ -270,8 +283,8 @@ public class LiftsPage extends AppCompatActivity {
                         if (lift.getId()==lifts.get(i).getId()){
                             lifts.remove(i);
                             newRef.child("lift"+lift.getId()).setValue(null);
-                            addToFirebase(lift, newRef);
                             lifts.add(i,lift);
+                            addToFirebase(lift, newRef);
                         }
                     }
                 }
@@ -351,7 +364,7 @@ public class LiftsPage extends AppCompatActivity {
         }
     }
 
-    public void copyBtn(View view){
+    public void copyBtnAction(View view){
         database.addListenerForSingleValueEvent(new ValueEventListener() {
             //Gets data from firebase
             @Override
@@ -388,9 +401,8 @@ public class LiftsPage extends AppCompatActivity {
                     @Override
                     public void onItemClick(AdapterView adapter, View v, int position, long arg3) {
                         Workout choosenWorkout = workouts.get(position);
-                        workout.setLifts(choosenWorkout.getLifts());
-                        lifts=choosenWorkout.getLifts();
-                        arrayAdapter.addAll(lifts);
+                        lifts.clear();
+                        lifts.addAll(choosenWorkout.getLifts());
                         arrayAdapter.notifyDataSetChanged();
                         lvCopy.setVisibility(View.GONE);
                     }
@@ -409,14 +421,20 @@ public class LiftsPage extends AppCompatActivity {
 
     public void addToFirebase(Lift lift, DatabaseReference databaseRef){
             database.getParent().child("lifts").child(lift.getLiftName().toLowerCase()).setValue(0);
-            databaseRef.child("lift"+lift.getId()).child("id").setValue(lift.getId());
-            databaseRef.child("lift"+lift.getId()).child("liftName").setValue(lift.getLiftName());
-            databaseRef.child("lift"+lift.getId()).child("notes").setValue(lift.getNotes());
-            for(Set set: lift.getSets()){
-                databaseRef.child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("id").setValue(set.getId());
-                databaseRef.child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("reps").setValue(set.getReps());
-                databaseRef.child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("weight").setValue(set.getWeight());
-            }
+if(addFieldsToWorkout()) {
+    database.child("workout" + workout.getId()).child("date").setValue(workout.getFirebaseDateStr());
+    database.child("workout" + workout.getId()).child("description").setValue(workout.getDescription());
+    database.child("workout" + workout.getId()).child("notes").setValue(workout.getNotes());
+    database.child("workout" + workout.getId()).child("id").setValue(workout.getId());
+    databaseRef.child("lift" + lift.getId()).child("id").setValue(lift.getId());
+    databaseRef.child("lift" + lift.getId()).child("liftName").setValue(lift.getLiftName());
+    databaseRef.child("lift" + lift.getId()).child("notes").setValue(lift.getNotes());
+    for (Set set : lift.getSets()) {
+        databaseRef.child("lift" + lift.getId()).child("sets").child("set" + set.getId()).child("id").setValue(set.getId());
+        databaseRef.child("lift" + lift.getId()).child("sets").child("set" + set.getId()).child("reps").setValue(set.getReps());
+        databaseRef.child("lift" + lift.getId()).child("sets").child("set" + set.getId()).child("weight").setValue(set.getWeight());
+    }
+}
     }
 
     public void getDescriptionHints(){
