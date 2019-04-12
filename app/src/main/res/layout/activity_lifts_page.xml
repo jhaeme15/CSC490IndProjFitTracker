@@ -27,7 +27,7 @@
         android:inputType="date"
          />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/txtDescriptionLiftsPage"
         android:layout_width="250dp"
         android:layout_height="wrap_content"

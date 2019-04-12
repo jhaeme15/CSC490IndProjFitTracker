@@ -78,6 +78,10 @@ public class Set implements Serializable {
      * @return a string displays the weight and reps for the set
      */
     public String toString(){
-        return weight+" x "+reps;
+        if(weight==0){
+            return ""+reps;
+        }else {
+            return weight + " x " + reps;
+        }
     }
 }

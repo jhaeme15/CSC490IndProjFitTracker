@@ -17,6 +17,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Author: Jared Haeme
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int CREATE_WORKOUT_ID = 1;
     public static final int EDIT_WORKOUT_ID = 2;
     private DatabaseReference database;
+
 
     /**
      * Initializes fields
@@ -150,12 +153,12 @@ public class MainActivity extends AppCompatActivity {
                         String liftName=snapshotLifts.child("liftName").getValue().toString();
                         int liftId=Integer.parseInt(snapshotLifts.child("id").getValue().toString());
                         String liftNotes=snapshotLifts.child("notes").getValue().toString();
-                        ArrayList<Set> sets=new ArrayList<Set>();
+                        ArrayList<com.example.fitnesstrackertest.Set> sets=new ArrayList<com.example.fitnesstrackertest.Set>();
                         for(DataSnapshot snapshotSets: snapshotLifts.child("sets").getChildren()){
                             int setId=Integer.parseInt(snapshotSets.child("id").getValue().toString());
                             int reps=Integer.parseInt(snapshotSets.child("reps").getValue().toString());
                             int weight=Integer.parseInt(snapshotSets.child("weight").getValue().toString());
-                            sets.add(new Set(setId, weight, reps));
+                            sets.add(new com.example.fitnesstrackertest.Set(setId, weight, reps));
                         }
                         lifts.add(new Lift(liftId, liftName, liftNotes, sets));
                     }
@@ -192,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
      * @param databaseRef the appropriate data reference
      */
     public void addToFirebase(Workout workout, DatabaseReference databaseRef){
+        database.getParent().child("descriptions").child(workout.getDescription().toLowerCase()).setValue(0);
         databaseRef.child("workout"+workout.getId()).child("date").setValue(workout.getFirebaseDateStr());
         databaseRef.child("workout"+workout.getId()).child("description").setValue(workout.getDescription());
         databaseRef.child("workout"+workout.getId()).child("notes").setValue(workout.getNotes());
@@ -200,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("id").setValue(lift.getId());
             databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("liftName").setValue(lift.getLiftName());
             databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("notes").setValue(lift.getNotes());
-            for(Set set: lift.getSets()){
+            for(com.example.fitnesstrackertest.Set set: lift.getSets()){
                 databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("id").setValue(set.getId());
                 databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("reps").setValue(set.getReps());
                 databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("weight").setValue(set.getWeight());

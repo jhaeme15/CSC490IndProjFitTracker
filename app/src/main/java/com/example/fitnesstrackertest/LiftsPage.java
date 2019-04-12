@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -27,6 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
+
 
 /**
  * Author: Jared Haeme
@@ -41,10 +44,12 @@ public class LiftsPage extends AppCompatActivity {
     private ListView lsLifts;
     private ListView lvCopy;
     private EditText txtDate;
-    private EditText txtDescription;
+    private AutoCompleteTextView txtDescription;
     private EditText txtNotes;
     private  Workout workout;
     private DatabaseReference database;
+    private ArrayAdapter<String> autoFillAdapter;
+    private java.util.Set<String> descriptions;
 //Id for activities
     public static final int CREATE_LIFT_ID = 100;
     public static final int EDIT_LIFT_ID =200;
@@ -63,8 +68,9 @@ public class LiftsPage extends AppCompatActivity {
         database= FirebaseDatabase.getInstance().getReference("current workouts");
         lsLifts=(ListView) findViewById(R.id.liftsListView);
         txtDate=(EditText) findViewById(R.id.txtDateLiftsPage);
-        txtDescription=(EditText) findViewById(R.id.txtDescriptionLiftsPage);
+        txtDescription=(AutoCompleteTextView) findViewById(R.id.txtDescriptionLiftsPage);
         txtNotes=(EditText) findViewById(R.id.txtNotesLiftsPage);
+        getDescriptionHints();
         if(workout!=null) {
             txtDate.setText(workout.getDateStr());
             txtDescription.setText(workout.getDescription());
@@ -236,11 +242,14 @@ public class LiftsPage extends AppCompatActivity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        DatabaseReference newRef=database.child("workout"+workout.getId()).child("lifts");
         if (requestCode == CREATE_LIFT_ID) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Lift newLift = (Lift) data.getSerializableExtra("lift");
                 if(newLift.getLiftName()!=null) {
+
+                    addToFirebase(newLift, newRef);
                     lifts.add(newLift);
                 }
 
@@ -252,6 +261,7 @@ public class LiftsPage extends AppCompatActivity {
                 if(lift.getId()<0) {
                   for (int i=lifts.size()-1; i>=0; i--){
                       if (Math.abs(lift.getId())==Math.abs(lifts.get(i).getId())){
+                          newRef.child("lift"+lift.getId()).setValue(null);
                           lifts.remove(i);
                       }
                   }
@@ -259,6 +269,8 @@ public class LiftsPage extends AppCompatActivity {
                     for (int i=lifts.size()-1; i>=0; i--){
                         if (lift.getId()==lifts.get(i).getId()){
                             lifts.remove(i);
+                            newRef.child("lift"+lift.getId()).setValue(null);
+                            addToFirebase(lift, newRef);
                             lifts.add(i,lift);
                         }
                     }
@@ -395,6 +407,37 @@ public class LiftsPage extends AppCompatActivity {
 
     }
 
+    public void addToFirebase(Lift lift, DatabaseReference databaseRef){
+            database.getParent().child("lifts").child(lift.getLiftName().toLowerCase()).setValue(0);
+            databaseRef.child("lift"+lift.getId()).child("id").setValue(lift.getId());
+            databaseRef.child("lift"+lift.getId()).child("liftName").setValue(lift.getLiftName());
+            databaseRef.child("lift"+lift.getId()).child("notes").setValue(lift.getNotes());
+            for(Set set: lift.getSets()){
+                databaseRef.child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("id").setValue(set.getId());
+                databaseRef.child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("reps").setValue(set.getReps());
+                databaseRef.child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("weight").setValue(set.getWeight());
+            }
+    }
 
+    public void getDescriptionHints(){
+        descriptions=new HashSet<String>();
+        database.getParent().child("descriptions").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    descriptions.add(snapshot.getKey().substring(0,1).toUpperCase()+snapshot.getKey().substring(1).toLowerCase());
+
+                }
+                autoFillAdapter=new ArrayAdapter<String>(LiftsPage.this, android.R.layout.simple_list_item_1, descriptions.toArray(new String[0]));
+                txtDescription.setAdapter(autoFillAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 
 }

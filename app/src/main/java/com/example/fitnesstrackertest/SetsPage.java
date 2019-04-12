@@ -6,32 +6,45 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class SetsPage extends AppCompatActivity {
     private LinearLayout linearLayout;
     private Button btnAddSet;
     private Button btnDeleteLift;
     private RelativeLayout btnLayout;
-    private EditText txtLiftType;
+    private AutoCompleteTextView txtLiftType;
     private EditText txtNotes;
     private ArrayList<Integer> weightsIds;
     private ArrayList<Integer> repsids;
     private ArrayList<RelativeLayout> setsViewList;
     private Lift lift;
     private int setNum;
+    private java.util.Set<String> liftsAuto;
+    private ArrayAdapter<String> autoFillAdapter;
+    private DatabaseReference database;
 
 
     @Override
@@ -39,8 +52,10 @@ public class SetsPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sets_page);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        database= FirebaseDatabase.getInstance().getReference("lifts");
+        getLiftHints();
         lift = (Lift) getIntent().getSerializableExtra("choosenLift");
-        txtLiftType =(EditText) findViewById(R.id.editTxtSetsPageLiftType) ;
+        txtLiftType =(AutoCompleteTextView) findViewById(R.id.editTxtSetsPageLiftType) ;
         txtNotes=(EditText) findViewById(R.id.txtNotesSetsPage);
         setNum=1;
         setsViewList=new ArrayList<RelativeLayout>();
@@ -82,7 +97,7 @@ public class SetsPage extends AppCompatActivity {
         repsids.add(editTextRep.getId());
        TextView xdivider=new TextView(this);
         xdivider.setId(View.generateViewId());
-         TextView setNumlbl=new TextView(this);
+        TextView setNumlbl=new TextView(this);
         setNumlbl.setId(View.generateViewId());
         Button btnDelSet=new Button(this);
         btnDelSet.setId(View.generateViewId());
@@ -291,14 +306,22 @@ public class SetsPage extends AppCompatActivity {
             int weight=0;
             int reps=0;
             if (tryParseInt(weightStr)){
-                weight=Integer.parseInt(weightStr);
+                if(Integer.parseInt(weightStr)>=0) {
+                    weight = Integer.parseInt(weightStr);
+                }else{
+                    valid=false;
+                }
+            }else if(weightStr.matches("")){
+                weight=0;
             }else{
-
-
                 valid=false;
             }
             if (tryParseInt(repsStr)){
-                reps=Integer.parseInt(repsStr);
+                if(Integer.parseInt(repsStr)>=0) {
+                    reps = Integer.parseInt(repsStr);
+                }else{
+                    valid=false;
+                }
             }else{
                 valid=false;
             }
@@ -336,5 +359,24 @@ public class SetsPage extends AppCompatActivity {
         }
     }
 
+    public void getLiftHints(){
+        liftsAuto=new HashSet<String>();
+        database.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    liftsAuto.add(snapshot.getKey().substring(0,1).toUpperCase()+snapshot.getKey().substring(1).toLowerCase());
 
+                }
+                autoFillAdapter=new ArrayAdapter<String>(SetsPage.this, android.R.layout.simple_list_item_1, liftsAuto.toArray(new String[0]));
+                txtLiftType.setAdapter(autoFillAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 }
