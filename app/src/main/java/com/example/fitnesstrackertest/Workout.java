@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Author: Jared Haeme
@@ -12,7 +13,7 @@ import java.util.ArrayList;
  * This class represents a workout which has a date of the workout, description, notes and a list of lifts for that workout
  */
 
-public class Workout implements Serializable {
+public class Workout implements Serializable, Comparable<Workout> {
     //Fields
     private LocalDate date;
     private String description;
@@ -164,5 +165,12 @@ public class Workout implements Serializable {
     @Override
     public String toString(){
             return getDateStr() + "\n" + description;
+    }
+
+
+
+    @Override
+    public int compareTo(Workout o) {
+        return this.date.compareTo(o.date);
     }
 }

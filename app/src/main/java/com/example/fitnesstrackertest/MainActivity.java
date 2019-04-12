@@ -4,6 +4,7 @@ package com.example.fitnesstrackertest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,8 +18,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Spinner;
+
 
 /**
  * Author: Jared Haeme
@@ -210,6 +215,40 @@ public class MainActivity extends AppCompatActivity {
                 databaseRef.child("workout"+workout.getId()).child("lifts").child("lift"+lift.getId()).child("sets").child("set"+set.getId()).child("weight").setValue(set.getWeight());
             }
         }
+    }
+    //https://www.viralandroid.com/2016/03/how-to-add-spinner-dropdown-list-to-android-actionbar-toolbar.html
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.sort_options, menu);
+
+        MenuItem item = menu.findItem(R.id.spinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        String[] spinner_list_item_array={"Newest", "Oldest"};
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinner_list_item_array);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //https://developer.android.com/guide/topics/ui/controls/spinner.html
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                if(position==0){
+                    Collections.sort(workouts, Collections.<Workout>reverseOrder());
+
+                    arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
+                    lvWorkout.setAdapter(arrayAdapter);
+                }else if(position==1){
+                    Collections.sort(workouts);
+                    arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
+                    lvWorkout.setAdapter(arrayAdapter);
+                }
+            }
+
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+        });
+        spinner.setAdapter(adapter);
+        return true;
     }
 }
 
