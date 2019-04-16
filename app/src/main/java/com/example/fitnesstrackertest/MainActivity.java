@@ -61,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         btnAddWorkout1 = (Button) findViewById(R.id.btnAddWorkout);
         workouts = new ArrayList<Workout>();
         databaseListener();
-
     }
 
     /**
@@ -102,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
                 Workout newWorkout = (Workout) data.getSerializableExtra("workout");
                 if(newWorkout.getDate()!=null) {
                     workouts.add(newWorkout);
+                    Collections.sort(workouts, Collections.<Workout>reverseOrder());
+                    arrayAdapter.notifyDataSetChanged();
                     addToFirebase(newWorkout, database);
 
                 }
@@ -128,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                         if (workout.getId()== workouts.get(i).getId()){
                             workouts.remove(i);
                             workouts.add(i,workout);
+                            Collections.sort(workouts, Collections.<Workout>reverseOrder());
+                            arrayAdapter.notifyDataSetChanged();
                             database.child("workout"+Math.abs(workout.getId())).setValue(null);
                             addToFirebase(workout, database);
                         }
@@ -186,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
                     workouts.add(new Workout(id, LocalDate.parse(date), description, notes, lifts));
                 }
-                Collections.sort(workouts,Collections.<Workout>reverseOrder());
+                Collections.sort(workouts, Collections.<Workout>reverseOrder());
                 arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
                 progressBarLayout.setVisibility(View.GONE);
                 lvWorkout.setAdapter(arrayAdapter);
@@ -257,7 +260,6 @@ public class MainActivity extends AppCompatActivity {
                                        int position, long id) {
                 if(position==0){
                     Collections.sort(workouts, Collections.<Workout>reverseOrder());
-
                     arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
                     lvWorkout.setAdapter(arrayAdapter);
                 }else if(position==1){
