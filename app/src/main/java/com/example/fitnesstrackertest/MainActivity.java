@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 Workout newWorkout = (Workout) data.getSerializableExtra("workout");
-                if(newWorkout.getDate()!=null) {
+                if(newWorkout.getId()>0) {
                     workouts.add(newWorkout);
                     Collections.sort(workouts, Collections.<Workout>reverseOrder());
                     arrayAdapter.notifyDataSetChanged();
