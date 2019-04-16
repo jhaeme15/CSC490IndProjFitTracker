@@ -29,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashSet;
 
 
@@ -401,7 +402,7 @@ public class LiftsPage extends AppCompatActivity {
 
                     workouts.add(new Workout(id, LocalDate.parse(date), description, notes, loadedLifts));
                 }
-
+                Collections.sort(workouts,  Collections.<Workout>reverseOrder());
                 ArrayAdapter arrayAdapterCopy = new ArrayAdapter(LiftsPage.this, android.R.layout.simple_expandable_list_item_1,  workouts);
                 lvCopy.setAdapter(arrayAdapterCopy);
                 lvCopy.setVisibility(View.VISIBLE);
