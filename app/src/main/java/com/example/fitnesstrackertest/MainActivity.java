@@ -8,6 +8,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Button;
 import android.view.View;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
+import android.view.Window;
 
 
 /**
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int EDIT_WORKOUT_ID = 2;
     public static final int STATS_PAGE = 3;
     private DatabaseReference database;
+    private LinearLayout progressBarLayout;
 
 
     /**
@@ -51,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progressBarLayout=(LinearLayout) findViewById(R.id.progressLayout);
+        progressBarLayout.setVisibility(View.VISIBLE);
         database=FirebaseDatabase.getInstance().getReference("current workouts");
         lvWorkout = (ListView) findViewById(R.id.workoutListView);
         btnAddWorkout1 = (Button) findViewById(R.id.btnAddWorkout);
@@ -181,7 +186,9 @@ public class MainActivity extends AppCompatActivity {
 
                     workouts.add(new Workout(id, LocalDate.parse(date), description, notes, lifts));
                 }
+                Collections.sort(workouts,Collections.<Workout>reverseOrder());
                 arrayAdapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_expandable_list_item_1, workouts);
+                progressBarLayout.setVisibility(View.GONE);
                 lvWorkout.setAdapter(arrayAdapter);
                 //gets selected item from listview and starts a new activity for editing that item
                 // https:stackoverflow.com/questions/18405299/onitemclicklistener-using-arrayadapter-for-listview

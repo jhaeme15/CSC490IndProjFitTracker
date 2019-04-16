@@ -34,6 +34,7 @@ private Map<String, Integer> maxReps;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats_page);
         workouts = (ArrayList<Workout>) getIntent().getSerializableExtra("workouts");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         minMaxWeightlifts=new TreeMap<String, int[]>();
         maxReps=new TreeMap<String, Integer>();
         lifts=new HashMap<String, ArrayList<Set>>();
