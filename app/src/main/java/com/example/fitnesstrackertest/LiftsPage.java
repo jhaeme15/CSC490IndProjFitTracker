@@ -206,6 +206,10 @@ public class LiftsPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if input is valid and adds them to workout
+     * @return boolean if input in text fields is valid
+     */
     public boolean addFieldsToWorkout(){
 
         String description=txtDescription.getText().toString();
@@ -248,14 +252,15 @@ public class LiftsPage extends AppCompatActivity {
     //https://developer.android.com/training/basics/intents/result
 
     /**
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     *Gets lift from sets page and adds it to list of lifts for workout
+     * @param requestCode id code of activity
+     * @param resultCode code of result from activity
+     * @param data lift from sets page
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         DatabaseReference newRef=database.child("workout"+workout.getId()).child("lifts");
+        //adds a new lift to lifts list
         if (requestCode == CREATE_LIFT_ID) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -268,6 +273,7 @@ public class LiftsPage extends AppCompatActivity {
 
             }
         }
+        //for deleting lift
         else if(requestCode==EDIT_LIFT_ID){
             if (resultCode == RESULT_OK) {
                 Lift lift = (Lift) data.getSerializableExtra("lift");
@@ -278,6 +284,7 @@ public class LiftsPage extends AppCompatActivity {
                           lifts.remove(i);
                       }
                   }
+                  //for editing lifts
                 }else{
                     for (int i=lifts.size()-1; i>=0; i--){
                         if (lift.getId()==lifts.get(i).getId()){
@@ -326,11 +333,6 @@ public class LiftsPage extends AppCompatActivity {
      */
     // got from https://stackoverflow.com/questions/8391979/does-java-have-a-int-tryparse-that-doesnt-throw-an-exception-for-bad-data
 
-    /**
-     * Checks if string value is an int
-     * @param value string
-     * @return boolen if string can be converted
-     */
     public boolean tryParseInt(String value) {
         try {
             Integer.parseInt(value);
@@ -354,6 +356,8 @@ public class LiftsPage extends AppCompatActivity {
         return max;
     }
 
+    /**
+     * Checks if back button was hit and saves lift or closes copyListview */
     //https://stackoverflow.com/questions/45729852/android-check-if-back-button-was-pressed?rq=1
     @Override
     public void onBackPressed() {
@@ -364,6 +368,10 @@ public class LiftsPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Loads all the workouts from firebase and opens a listview of those workouts for the user to choose to copy lifts over
+     * @param view Button
+     */
     public void copyBtnAction(View view){
         database.addListenerForSingleValueEvent(new ValueEventListener() {
             //Gets data from firebase
@@ -419,6 +427,11 @@ public class LiftsPage extends AppCompatActivity {
 
     }
 
+    /**
+     * Adds workout to firebase if data entered is valid
+     * @param lift lift added from sets page
+     * @param databaseRef the reference to the workout in the database
+     */
     public void addToFirebase(Lift lift, DatabaseReference databaseRef){
             database.getParent().child("lifts").child(lift.getLiftName().toLowerCase()).setValue(0);
 if(addFieldsToWorkout()) {
@@ -437,6 +450,9 @@ if(addFieldsToWorkout()) {
 }
     }
 
+    /**
+     * Gets list of previous descriptions from firebase to have an autocomplete for descriptions
+     */
     public void getDescriptionHints(){
         descriptions=new HashSet<String>();
         database.getParent().child("descriptions").addListenerForSingleValueEvent(new ValueEventListener() {

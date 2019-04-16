@@ -7,13 +7,29 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
-    <Button
-        android:id="@+id/btnAddWorkout"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="addWorkout"
-        android:text="Add Workout" />
+        android:layout_margin="10dp">
+
+        <Button
+            android:id="@+id/btnAddWorkout"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:onClick="addWorkout"
+            android:text="Add Workout"
+            android:layout_alignParentLeft="true"
+            />
+
+        <Button
+            android:id="@+id/btnStats"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:onClick="openStatsPage"
+            android:text="Stats" />
+    </RelativeLayout>
+
 
     <ListView
         android:id="@+id/workoutListView"

@@ -168,7 +168,11 @@ public class Workout implements Serializable, Comparable<Workout> {
     }
 
 
-
+    /**
+     *
+     * @param o workout object to compare to the actual parameter
+     * @return int which is 0 is the dates are equal, negative or positive if one date is before or after the other
+     */
     @Override
     public int compareTo(Workout o) {
         return this.date.compareTo(o.date);

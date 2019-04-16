@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter arrayAdapter;
     public static final int CREATE_WORKOUT_ID = 1;
     public static final int EDIT_WORKOUT_ID = 2;
+    public static final int STATS_PAGE = 3;
     private DatabaseReference database;
 
 
@@ -67,6 +68,16 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("choosenWorkout",new Workout(findMaxid()+1, LocalDate.now(), "","", new ArrayList<Lift>()));
         startActivityForResult(intent, CREATE_WORKOUT_ID);
 
+    }
+
+    /**
+     * Opens stats page to display workout stats
+     * @param v
+     */
+    public void openStatsPage(View v){
+        Intent intent = new Intent(this, StatsPage.class);
+        intent.putExtra("workouts",workouts);
+        startActivityForResult(intent, STATS_PAGE);
     }
 
     /**
@@ -216,6 +227,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Adds a drop down for sorting in the top right action bar
+     * @param menu
+     * @return boolean
+     */
     //https://www.viralandroid.com/2016/03/how-to-add-spinner-dropdown-list-to-android-actionbar-toolbar.html
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

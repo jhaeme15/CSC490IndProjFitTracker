@@ -30,7 +30,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+/**
+ * Author: Jared Haeme
+ * Date: 4/16/2019
+ * Page for editing a single lift by changing the name, notes,and the different sets
+ */
 public class SetsPage extends AppCompatActivity {
+    //Data fields
     private LinearLayout linearLayout;
     private Button btnAddSet;
     private Button btnDeleteLift;
@@ -46,7 +52,10 @@ public class SetsPage extends AppCompatActivity {
     private ArrayAdapter<String> autoFillAdapter;
     private DatabaseReference database;
 
-
+    /**
+     * Creates initial Ui and initializes variables
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +83,12 @@ public class SetsPage extends AppCompatActivity {
 
     }
 
+    /**
+     * Sets up layout for adding a set dynamically.
+     * @param linearLayout the linear layout that the set layout will be added to
+     * @param setNum number of sets created
+     * @param set a set object tracking the weight and reps
+     */
     public void createSetUI(final LinearLayout linearLayout, final int setNum, Set set){
         final RelativeLayout relativeLayout=new RelativeLayout(this);
         RelativeLayout.LayoutParams params=new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -159,6 +174,10 @@ public class SetsPage extends AppCompatActivity {
         setsViewList.add(relativeLayout);
     }
 
+    /**
+     * Allows to dynamically add buttons to bottom for set
+     * @param linearLayout
+     */
     public void createButtonUI(final LinearLayout linearLayout){
         btnAddSet =new Button(this);
         btnDeleteLift=new Button(this);
@@ -192,40 +211,50 @@ public class SetsPage extends AppCompatActivity {
                 linearLayout.addView(btnLayout, btnRelLayoutparams);
             }
         });
-
+//Listener for delete lift button
         btnDeleteLift.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //https://stackoverflow.com/questions/36747369/how-to-show-a-pop-up-in-android-studio-to-confirm-an-order
-                AlertDialog.Builder builder = new AlertDialog.Builder(SetsPage.this);
-                builder.setCancelable(true);
-                builder.setTitle("Confirm Delete");
-                builder.setMessage("Are you sure you want to delete this lift?");
-                builder.setPositiveButton("Confirm Delete",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                               lift.setId(lift.getId()*-1);
-                                Intent intent=new Intent(SetsPage.this, LiftsPage.class);
-                                intent.putExtra("lift", lift);
-                                setResult(Activity.RESULT_OK, intent);
-                                finish();
-                            }
-                        });
-                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
+                delLift();
             }
         });
 
     }
 
+    /**
+     * Action for when delete lift button is clicked
+     */
+    public void delLift(){
+        //https://stackoverflow.com/questions/36747369/how-to-show-a-pop-up-in-android-studio-to-confirm-an-order
+        AlertDialog.Builder builder = new AlertDialog.Builder(SetsPage.this);
+        builder.setCancelable(true);
+        builder.setTitle("Confirm Delete");
+        builder.setMessage("Are you sure you want to delete this lift?");
+        builder.setPositiveButton("Confirm Delete",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        lift.setId(lift.getId()*-1);
+                        Intent intent=new Intent(SetsPage.this, LiftsPage.class);
+                        intent.putExtra("lift", lift);
+                        setResult(Activity.RESULT_OK, intent);
+                        finish();
+                    }
+                });
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
 
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * Adds back button to top title bar
+     * @param item menu item object
+     * @return boolean
+     */
     //https://stackoverflow.com/questions/14545139/android-back-button-in-the-title-bar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -236,10 +265,19 @@ public class SetsPage extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /**
+     * creates back button
+     * @param menu
+     * @return
+     */
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
     }
 
+    /**
+     * Action for if android back button was pressed
+     */
     //https://stackoverflow.com/questions/45729852/android-check-if-back-button-was-pressed?rq=1
     @Override
     public void onBackPressed() {
@@ -256,6 +294,10 @@ public class SetsPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Removes a set layout from the UI linear layout
+     * @param v
+     */
     public void delSet(View v){
 
             int id = v.getId();
@@ -284,54 +326,12 @@ public class SetsPage extends AppCompatActivity {
             }
     }
 
+    /**
+     * Saves data and adds it to the list of workouts
+     */
     public void saveData(){
-        boolean valid=true;
-        ArrayList<Set> sets=new ArrayList<Set>();
-        String liftName= txtLiftType.getText().toString();
-        String notes=txtNotes.getText().toString();
 
-
-        if(!liftName.matches("")){
-            lift.setLiftName(liftName);
-        }else{
-            valid=false;
-        }
-        lift.setNotes(notes);
-        for (int i=0; i<setsViewList.size(); i++){
-            RelativeLayout relativeLayout=setsViewList.get(i);
-            EditText txtWeights=relativeLayout.findViewById(weightsIds.get(i));
-            EditText txtReps=relativeLayout.findViewById(repsids.get(i));
-            String weightStr=txtWeights.getText().toString();
-            String repsStr=txtReps.getText().toString();
-            int weight=0;
-            int reps=0;
-            if (tryParseInt(weightStr)){
-                if(Integer.parseInt(weightStr)>=0) {
-                    weight = Integer.parseInt(weightStr);
-                }else{
-                    valid=false;
-                }
-            }else if(weightStr.matches("")){
-                weight=0;
-            }else{
-                valid=false;
-            }
-            if (tryParseInt(repsStr)){
-                if(Integer.parseInt(repsStr)>=0) {
-                    reps = Integer.parseInt(repsStr);
-                }else{
-                    valid=false;
-                }
-            }else{
-                valid=false;
-            }
-            if(valid) {
-                Set set=new Set(i+1, weight, reps);
-                sets.add(set);
-            }
-        }
-        if(valid) {
-            lift.setSets(sets);
+        if(addFieldstoLift()) {
             Intent intent = new Intent(SetsPage.this, LiftsPage.class);
             intent.putExtra("lift", lift);
             setResult(Activity.RESULT_OK, intent);
@@ -359,6 +359,9 @@ public class SetsPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Gets hints of lift names from firebase for auto complete
+     */
     public void getLiftHints(){
         liftsAuto=new HashSet<String>();
         database.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -378,5 +381,56 @@ public class SetsPage extends AppCompatActivity {
             }
         });
 
+    }
+
+    /**
+     * Checks if input in fields is valid then adds them to a set object then those lists of sets are added to a lift object
+     * @return
+     */
+    public boolean addFieldstoLift(){
+        ArrayList<Set> sets=new ArrayList<Set>();
+        String liftName= txtLiftType.getText().toString();
+        String notes=txtNotes.getText().toString();
+
+
+        if(!liftName.matches("")){
+            lift.setLiftName(liftName);
+        }else{
+            return false;
+        }
+        lift.setNotes(notes);
+        for (int i=0; i<setsViewList.size(); i++){
+            RelativeLayout relativeLayout=setsViewList.get(i);
+            EditText txtWeights=relativeLayout.findViewById(weightsIds.get(i));
+            EditText txtReps=relativeLayout.findViewById(repsids.get(i));
+            String weightStr=txtWeights.getText().toString();
+            String repsStr=txtReps.getText().toString();
+            int weight=0;
+            int reps=0;
+            if (tryParseInt(weightStr)){
+                if(Integer.parseInt(weightStr)>=0) {
+                    weight = Integer.parseInt(weightStr);
+                }else{
+                    return false;
+                }
+            }else if(weightStr.matches("")){
+                weight=0;
+            }else{
+                return false;
+            }
+            if (tryParseInt(repsStr)){
+                if(Integer.parseInt(repsStr)>=0) {
+                    reps = Integer.parseInt(repsStr);
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+            Set set=new Set(i+1, weight, reps);
+            sets.add(set);
+        }
+        lift.setSets(sets);
+        return true;
     }
 }
